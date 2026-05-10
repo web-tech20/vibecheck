@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VibeCheck — Voice Authenticity Protocol</title>
+<meta name="description" content="Your voice, verified forever. Immutable voice authenticity on Solana.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#9945FF" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="VibeCheck" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="apple-touch-icon" href="/icon-192.png" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+/* Aurora Borealis dynamique */
+body {
+  font-family:'Inter',sans-serif;color:#e8e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  background: linear-gradient(135deg, #0a0a1a 0%, #120025 50%, #0d0030 100%);
+  transition: background 1.5s ease-in-out;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(20,241,149,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 30%, rgba(153,69,255,0.1) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(255,56,96,0.06) 0%, transparent 50%);
+  z-index: 0;
+  pointer-events: none;
+  transition: all 2s ease;
+}
+
+body.mood-excited {
+  background: linear-gradient(135deg, #1a0a0a 0%, #2d1a00 50%, #1a0020 100%);
+}
+body.mood-excited::before {
+  background: radial-gradient(ellipse at 30% 50%, rgba(255,107,53,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 30%, rgba(255,56,96,0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(245,158,11,0.1) 0%, transparent 50%);
+}
+
+body.mood-calm {
+  background: linear-gradient(135deg, #0a1a1a 0%, #002030 50%, #0a0a20 100%);
+}
+body.mood-calm::before {
+  background: radial-gradient(ellipse at 30% 50%, rgba(20,241,149,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 30%, rgba(6,214,160,0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(0,200,255,0.1) 0%, transparent 50%);
+}
+
+body.mood-passionate {
+  background: linear-gradient(135deg, #1a0a1a 0%, #250020 50%, #0a0020 100%);
+}
+body.mood-passionate::before {
+  background: radial-gradient(ellipse at 30% 50%, rgba(255,56,96,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 30%, rgba(153,69,255,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(255,0,128,0.1) 0%, transparent 50%);
+}
+
+body.mood-inspired {
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a002d 50%, #001a30 100%);
+}
+body.mood-inspired::before {
+  background: radial-gradient(ellipse at 30% 50%, rgba(153,69,255,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 30%, rgba(20,241,149,0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(255,215,0,0.1) 0%, transparent 50%);
+}
+
+body.mood-confident {
+  background: linear-gradient(135deg, #0a0a1a 0%, #001a20 50%, #0d0025 100%);
+}
+body.mood-confident::before {
+  background: radial-gradient(ellipse at 30% 50%, rgba(6,214,160,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 30%, rgba(20,241,149,0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(0,180,255,0.1) 0%, transparent 50%);
+}
+
+/* Particules aurora flottantes */
+.aurora-particle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: auroraFloat 8s ease-in-out infinite;
+  filter: blur(40px);
+  opacity: 0.3;
+}
+
+@keyframes auroraFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(100px, -50px) scale(1.2); }
+  50% { transform: translate(50px, 100px) scale(0.8); }
+  75% { transform: translate(-80px, 30px) scale(1.1); }
+}
+/* Particules CSS */
+.particle{position:fixed;border-radius:50%;pointer-events:none;opacity:.25;animation:float linear infinite}
+@keyframes float{0%{transform:translateY(100vh) scale(0)}50%{opacity:.5}100%{transform:translateY(-10vh) scale(1);opacity:0}}
+/* --- Layout --- */
+.wrap{position:relative;z-index:1;width:100%;max-width:480px;padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:20px}
+/* Header */
+.header{text-align:center;margin-top:20px}
+.header h1{font-size:2.6rem;font-weight:800;background:linear-gradient(135deg,#b06aff,#14F195,#e040a0);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s ease infinite;filter:drop-shadow(0 0 20px rgba(153,69,255,.3))}
+@keyframes shimmer{0%,100%{background-position:0% center}50%{background-position:200% center}}
+.header p{font-size:.88rem;color:#8888aa;margin-top:6px;letter-spacing:.8px;text-transform:uppercase;font-weight:300}
+.badges{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.badge{font-size:.65rem;padding:5px 12px;border-radius:20px;background:rgba(153,69,255,.08);border:1px solid rgba(153,69,255,.2);color:#c0a0ff;font-weight:500;letter-spacing:.5px;transition:all .3s}
+.badge:hover{background:rgba(153,69,255,.15);border-color:rgba(153,69,255,.4);transform:translateY(-1px)}
+/* Carte principale */
+.card{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(153,69,255,.15);border-radius:24px;backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);padding:36px 24px;display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;overflow:hidden;transition:transform .4s,box-shadow .4s;box-shadow:0 0 40px rgba(153,69,255,.06),inset 0 1px 0 rgba(255,255,255,.05)}
+.card:hover{box-shadow:0 0 60px rgba(153,69,255,.1),inset 0 1px 0 rgba(255,255,255,.08)}
+@keyframes microShake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+.card.proving { animation: microShake 0.1s infinite; }
+@keyframes solanaFlash {
+  0%,100% { box-shadow: 0 0 0 0 rgba(20,241,149,0); }
+  50% { box-shadow: 0 0 60px 20px rgba(20,241,149,0.6), 0 0 120px 40px rgba(153,69,255,0.3); }
+}
+.card.proven { animation: solanaFlash 1s ease 2; }
+/* Scanner holographique */
+.scanner{position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);opacity:0;pointer-events:none}
+.scanner.active{opacity:1;animation:scan 1.5s ease-in-out infinite}
+@keyframes scan{0%{top:0}100%{top:100%}}
+/* Micro */
+.mic-area{position:relative;width:88px;height:88px;display:flex;align-items:center;justify-content:center}
+.mic-ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(153,69,255,.3);animation:pulseRing 2s ease infinite}
+@keyframes pulseRing{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.35);opacity:0}}
+.mic-icon{font-size:2.8rem;z-index:1;transition:filter .4s}
+.mic-icon.recording{filter:drop-shadow(0 0 18px #ff3860);animation:micPulse .6s ease infinite alternate}
+@keyframes micPulse{to{transform:scale(1.15)}}
+/* Barres audio */
+.wave{display:flex;gap:4px;align-items:end;height:36px;opacity:0;transition:opacity .4s}
+.wave.visible{opacity:1}
+.wave span{width:4px;border-radius:4px;background:linear-gradient(to top,#9945FF,#14F195);animation:bar .4s ease infinite alternate}
+.wave span:nth-child(1){height:30%;animation-delay:0s}
+.wave span:nth-child(2){height:60%;animation-delay:.1s}
+.wave span:nth-child(3){height:90%;animation-delay:.05s}
+.wave span:nth-child(4){height:45%;animation-delay:.15s}
+.wave span:nth-child(5){height:75%;animation-delay:.08s}
+.wave span:nth-child(6){height:50%;animation-delay:.12s}
+.wave span:nth-child(7){height:85%;animation-delay:.03s}
+.wave span:nth-child(8){height:35%;animation-delay:.18s}
+@keyframes bar{to{height:100%}}
+/* État texte */
+.status{font-size:.85rem;color:#a0a0c0;min-height:20px;transition:opacity .4s}
+.dots::after{content:'';animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+/* Barre de progression */
+.progress-bar{width:100%;height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;display:none}
+.progress-bar.visible{display:block}
+.progress-bar .fill{height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,#9945FF,#14F195);transition:width .3s}
+/* Boutons */
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%}
+.btn{padding:14px 28px;border:none;border-radius:14px;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .3s;min-height:48px;display:inline-flex;align-items:center;gap:8px;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.1),transparent);opacity:0;transition:opacity .3s}
+.btn:hover::after{opacity:1}
+.btn:active{transform:scale(.96)}
+.btn-record{background:linear-gradient(135deg,#9945FF,#e040a0);color:#fff;animation:btnPulse 2.5s ease infinite;box-shadow:0 4px 20px rgba(153,69,255,.3)}
+.btn-record:hover{box-shadow:0 4px 35px rgba(153,69,255,.5);transform:translateY(-2px)}
+@keyframes btnPulse{0%,100%{box-shadow:0 4px 20px rgba(153,69,255,.3)}50%{box-shadow:0 4px 20px rgba(153,69,255,.3),0 0 0 12px rgba(153,69,255,0)}}
+.btn-stop{background:linear-gradient(135deg,#ff3860,#ff6b6b);color:#fff;display:none;box-shadow:0 4px 20px rgba(255,56,96,.3)}
+.btn-prove{background:linear-gradient(135deg,#9945FF,#14F195);color:#fff;display:none;box-shadow:0 4px 20px rgba(20,241,149,.2)}
+.btn-prove:hover{box-shadow:0 4px 35px rgba(20,241,149,.4);transform:translateY(-2px)}
+.btn-reset{background:rgba(255,255,255,.04);color:#a0a0c0;border:1px solid rgba(255,255,255,.1);display:none}
+.btn-reset:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
+.btn-demo{position:fixed;bottom:16px;right:16px;background:rgba(153,69,255,.08);color:#8866cc;font-size:.72rem;padding:8px 14px;border-radius:10px;border:1px solid rgba(153,69,255,.15);transition:all .3s}
+.btn-demo:hover{background:rgba(153,69,255,.15);color:#b090ff}
+/* Résultat */
+.result{width:100%;display:none;flex-direction:column;gap:16px;animation:fadeUp .5s ease}
+.result.visible{display:flex}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.transcript-box{background:rgba(255,255,255,.03);border:1px solid rgba(153,69,255,.12);border-radius:16px;padding:20px;font-size:.9rem;line-height:1.7;color:#d0d0e8;min-height:48px;position:relative}
+.transcript-box::before{content:'"';position:absolute;top:8px;left:12px;font-size:2rem;color:rgba(153,69,255,.2);font-family:Georgia,serif}
+/* Vibe Analysis */
+.vibe-card{background:rgba(255,255,255,.03);border:1px solid rgba(153,69,255,.12);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.vibe-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(153,69,255,.3),transparent)}
+.vibe-card h3{font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;color:#b06aff;font-weight:600}
+.vibe-row{display:flex;justify-content:space-between;align-items:center;font-size:.85rem}
+.vibe-row .label{color:#8888aa}
+.vibe-row .value{font-weight:600}
+.conf-bar{width:120px;height:6px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden}
+.conf-bar .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#06d6a0,#14F195);transition:width 1s ease;box-shadow:0 0 8px rgba(6,214,160,.3)}
+.energy-badge{padding:4px 12px;border-radius:12px;font-size:.75rem;font-weight:600}
+.energy-high{background:rgba(255,107,53,.12);color:#ff6b35;box-shadow:inset 0 0 12px rgba(255,107,53,.08)}
+.energy-medium{background:rgba(255,209,102,.12);color:#ffd166;box-shadow:inset 0 0 12px rgba(255,209,102,.08)}
+.energy-vhigh{background:rgba(255,56,96,.12);color:#ff3860;box-shadow:inset 0 0 12px rgba(255,56,96,.08)}
+.proof-id{font-family:monospace;font-size:.8rem;color:#14F195;background:rgba(20,241,149,.06);padding:10px 14px;border-radius:12px;text-align:center;letter-spacing:1.5px;border:1px solid rgba(20,241,149,.12)}
+/* Section Solana */
+.solana-section{width:100%;display:none;flex-direction:column;gap:14px;animation:fadeUp .5s ease}
+.solana-section.visible{display:flex}
+.timeline{display:flex;flex-direction:column;gap:0;padding:0 8px}
+.tl-step{display:flex;align-items:center;gap:12px;padding:10px 0;position:relative;opacity:.3;transition:opacity .5s}
+.tl-step.done{opacity:1}
+.tl-step::before{content:'';position:absolute;left:14px;top:32px;width:2px;height:calc(100% - 12px);background:rgba(153,69,255,.2)}
+.tl-step:last-child::before{display:none}
+.tl-step .icon{font-size:1.2rem;width:30px;text-align:center;flex-shrink:0}
+.tl-step .txt{font-size:.8rem;color:#8888aa}
+.tl-step.done .txt{color:#e8e8f0}
+.hash-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(153,69,255,.1);border-radius:14px;padding:14px 16px;font-family:monospace;font-size:.75rem;color:#a0a0c0;cursor:pointer;transition:all .3s}
+.hash-row:hover{background:rgba(255,255,255,.06);border-color:rgba(153,69,255,.2);transform:translateY(-1px)}
+.hash-row .copy{font-size:.9rem}
+.explorer-link{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(153,69,255,.1),rgba(20,241,149,.1));border:1px solid rgba(153,69,255,.15);color:#14F195;font-weight:600;font-size:.85rem;text-decoration:none;transition:all .3s;box-shadow:0 4px 20px rgba(20,241,149,.08)}
+.explorer-link:hover{background:linear-gradient(135deg,rgba(153,69,255,.2),rgba(20,241,149,.2));transform:translateY(-2px);box-shadow:0 8px 30px rgba(20,241,149,.15)}
+.verified{text-align:center;font-size:.8rem;color:#14F195;font-weight:500;text-shadow:0 0 12px rgba(20,241,149,.3)}
+/* Network status */
+.net-status{display:flex;align-items:center;gap:6px;font-size:.65rem;color:#06d6a0;margin-top:8px}
+.net-dot{width:6px;height:6px;border-radius:50%;background:#06d6a0;animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+/* Flash overlay */
+.flash{position:fixed;inset:0;z-index:100;pointer-events:none;opacity:0}
+.flash.fire{animation:flashAnim .6s ease}
+@keyframes flashAnim{0%{opacity:0;background:radial-gradient(circle at center,rgba(20,241,149,.4),transparent 60%)}30%{opacity:1}100%{opacity:0}}
+/* Confettis */
+.confetti{position:fixed;top:-10px;width:8px;height:8px;z-index:99;pointer-events:none;border-radius:2px;animation:confettiFall linear forwards}
+@keyframes confettiFall{to{top:110vh;transform:rotate(720deg)}}
+@keyframes confettiBurst {
+  0% { transform: translate(-50%,-50%) rotate(0deg) scale(1); opacity:1; }
+  100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0); opacity:0; }
+}
+.hidden{display:none!important}
+/* Badge & Share */
+.extra-actions{display:flex;gap:10px;margin-top:15px;justify-content:center;width:100%}
+.btn-badge{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;box-shadow:0 4px 15px rgba(245,158,11,.2)}
+.btn-badge:hover{box-shadow:0 4px 25px rgba(245,158,11,.4);transform:translateY(-2px)}
+.btn-share{background:rgba(255,255,255,.06);color:#e8e8f0;border:1px solid rgba(255,255,255,.1)}
+.btn-share:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:#14F195;color:#000;padding:10px 20px;border-radius:20px;font-weight:600;opacity:0;transition:all .3s;z-index:1000}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* Vibe Wall */
+.vibe-wall{width:100%;margin-top:30px;display:flex;flex-direction:column;gap:12px}
+.vibe-wall h2{font-size:1.1rem;color:#a0a0c0;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:10px;margin-bottom:10px}
+.feed-list{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:5px}
+.feed-list::-webkit-scrollbar{width:4px}
+.feed-list::-webkit-scrollbar-thumb{background:rgba(153,69,255,.3);border-radius:4px}
+.feed-item{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);padding:12px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .3s;animation:fadeUp .5s ease backwards}
+.feed-item:hover{background:rgba(255,255,255,.05);border-color:rgba(153,69,255,.2);transform:translateX(4px)}
+.feed-main{display:flex;flex-direction:column;gap:4px}
+.feed-text{font-size:.85rem;color:#e8e8f0}
+.feed-meta{font-size:.7rem;color:#8888aa;display:flex;gap:8px;align-items:center}
+.feed-solana{color:#14F195;font-size:.65rem;background:rgba(20,241,149,.1);padding:2px 6px;border-radius:6px}
+.vibe-counter {
+  text-align: center;
+  margin: 10px 0 20px;
+  font-size: 0.85rem;
+  color: #8888aa;
+}
+.vibe-counter span {
+  font-weight: 800;
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, #14F195, #9945FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.vibe-counter .count {
+  font-size: 1.4rem;
+}
+/* World Mood Map */
+.world-map-section {
+  width: 100%;
+  max-width: 500px;
+  margin: 30px auto;
+  padding: 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  text-align: center;
+}
+.world-map-section h2 {
+  font-size: 1rem;
+  color: #a0a0c0;
+  margin-bottom: 15px;
+}
+.world-map {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.world-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: pulseDot 2s ease-in-out infinite;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.world-dot:hover {
+  transform: scale(2);
+  z-index: 10;
+}
+.world-dot::after {
+  content: attr(data-city);
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  white-space: nowrap;
+  color: #e8e8f0;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.world-dot:hover::after {
+  opacity: 1;
+}
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 4px 2px currentColor; opacity: 0.8; }
+  50% { box-shadow: 0 0 12px 6px currentColor; opacity: 1; }
+}
+.map-legend {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 12px;
+  font-size: 0.65rem;
+  color: #8888aa;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+</style>
+</head>
+<body>
+<!-- Fond -->
+<div class="flash" id="flash"></div>
+
+<!-- Contenu -->
+<div class="wrap">
+  <!-- Header -->
+  <header class="header">
+    <h1>VibeCheck 🎤</h1>
+    <p>Your voice. Verified forever.</p>
+    <div class="vibe-counter" id="vibeCounter">
+      <span class="count" id="vibeCount">0</span> voix gravées sur Solana
+    </div>
+    <div class="badges">
+      <span class="badge">ElevenLabs STT</span>
+      <span class="badge">Solana Devnet</span>
+      <span class="badge">SHA-256</span>
+      <span class="badge">On-Chain Proof</span>
+    </div>
+    <div class="net-status"><span class="net-dot"></span> Solana Devnet — Live</div>
+  </header>
+
+  <!-- Carte principale -->
+  <div class="card" id="card">
+    <div class="scanner" id="scanner"></div>
+    <div class="mic-area">
+      <div class="mic-ring"></div>
+      <div class="mic-icon" id="micIcon">🎙️</div>
+    </div>
+    <div class="wave" id="wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="status" id="status">Appuie pour parler</div>
+    <div class="progress-bar" id="progressBar"><div class="fill" id="progressFill"></div></div>
+    <div class="btns">
+      <button class="btn btn-record" id="btnRecord" onclick="startRecording()">🎙️ Enregistrer</button>
+      <button class="btn btn-stop" id="btnStop" onclick="stopRecording()">⏹️ Stop</button>
+      <button class="btn btn-prove" id="btnProve" onclick="proveOnSolana()">🔗 Graver sur Solana</button>
+      <button class="btn btn-reset" id="btnReset" onclick="resetAll()">🔄 Recommencer</button>
+    </div>
+  </div>
+
+  <!-- Résultat transcription -->
+  <div class="result" id="resultSection">
+    <div class="transcript-box" id="transcript"></div>
+    <div class="vibe-card">
+      <h3>✦ Vibe Analysis</h3>
+      <div class="vibe-row"><span class="label">Emotion</span><span class="value" id="emotion"></span></div>
+      <div class="vibe-row"><span class="label">Confidence</span><div class="conf-bar"><div class="fill" id="confFill"></div></div></div>
+      <div class="vibe-row"><span class="label">Energy</span><span id="energy"></span></div>
+    </div>
+    <div class="proof-id" id="proofIdDisplay"></div>
+    <audio id="audioPlayback" controls style="width:100%; height:30px; border-radius:15px; margin-top:10px; display:none; outline:none; filter: invert(0.9) hue-rotate(180deg);"></audio>
+  </div>
+
+  <!-- Section Solana -->
+  <div class="solana-section" id="solanaSection">
+    <div class="timeline" id="timeline">
+      <div class="tl-step" id="tl1"><span class="icon">🎤</span><span class="txt">Voice captured</span></div>
+      <div class="tl-step" id="tl2"><span class="icon">🧠</span><span class="txt">AI transcribed</span></div>
+      <div class="tl-step" id="tl3"><span class="icon">🔐</span><span class="txt">Hash generated</span></div>
+      <div class="tl-step" id="tl4"><span class="icon">⛓️</span><span class="txt">Anchored on Solana</span></div>
+    </div>
+    <div class="hash-row" id="hashRow" onclick="copyHash()"><span id="hashText">—</span><span class="copy">📋</span></div>
+    <a class="explorer-link" id="explorerLink" href="#" target="_blank">🔍 Voir sur Solana Explorer</a>
+    <div class="verified" id="verifiedText" style="display:none">✓ Transcript fingerprint verified</div>
+    <div class="extra-actions" id="extraActions" style="display:none">
+      <button id="btnBadge" class="btn btn-badge" onclick="downloadBadge()">🎖️ Générer mon badge</button>
+      <button class="btn btn-share" onclick="shareProof()">🔗 Partager</button>
+    </div>
+  </div>
+  
+  <!-- Vibe Wall -->
+  <div class="vibe-wall" id="vibeWall">
+    <h2>🌐 Dernières vibes gravées</h2>
+    <div class="feed-list" id="feedList"></div>
+  </div>
+  
+  <div class="world-map-section">
+    <h2>🌍 World Mood Map</h2>
+    <div class="world-map" id="worldMap"></div>
+    <div class="map-legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#ff6b35"></span> Excited</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#14F195"></span> Calm</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#ff3860"></span> Passionate</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#9945FF"></span> Inspired</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#06d6a0"></span> Confident</span>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast">Lien copié dans le presse-papier !</div>
+</div>
+
+<!-- Bouton démo caché -->
+<button class="btn btn-demo" onclick="useDemo()">📼 Use demo voice</button>
+
+<!-- QR Code -->
+<div style="position:fixed;bottom:15px;right:15px;z-index:9999;background:white;padding:8px;border-radius:12px;cursor:pointer" onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data='+encodeURIComponent('https://vibecheck-rho-three.vercel.app'),'_blank')" title="Scanner pour ouvrir VibeCheck">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://vibecheck-rho-three.vercel.app" alt="QR Code" style="display:block;border-radius:6px" width="60" height="60">
+</div>
+
+<script>
+// --- État global ---
+let state = 'IDLE';
+let mediaRecorder, audioChunks = [];
+let currentData = null; // { text, emotion, confidence, energy, proofId }
+let provenData = null; // { hash, signature, explorerUrl }
+
+// --- Références DOM ---
+const $ = id => document.getElementById(id);
+
+// Appliquer le thème Aurora selon l'émotion
+function setMoodTheme(emotion) {
+  const moods = {
+    'Excited': 'mood-excited',
+    'Calm': 'mood-calm',
+    'Passionate': 'mood-passionate',
+    'Inspired': 'mood-inspired',
+    'Confident': 'mood-confident',
+    'Determined': 'mood-confident'
+  };
+  
+  // Retirer tous les moods
+  document.body.classList.remove('mood-excited', 'mood-calm', 'mood-passionate', 'mood-inspired', 'mood-confident');
+  
+  // Appliquer le nouveau
+  const moodClass = moods[emotion] || '';
+  if (moodClass) {
+    setTimeout(() => document.body.classList.add(moodClass), 300);
+  }
+}
+
+// Création des particules Aurora
+function createAuroraParticles() {
+  const colors = [
+    'rgba(20,241,149,0.4)',
+    'rgba(153,69,255,0.4)',
+    'rgba(255,56,96,0.3)',
+    'rgba(6,214,160,0.3)',
+    'rgba(245,158,11,0.2)'
+  ];
+  
+  for (let i = 0; i < 5; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'aurora-particle';
+    particle.style.cssText = `
+      width: ${200 + Math.random() * 300}px;
+      height: ${200 + Math.random() * 300}px;
+      background: ${colors[i]};
+      top: ${Math.random() * 100}%;
+      left: ${Math.random() * 100}%;
+      animation-delay: ${Math.random() * -8}s;
+      animation-duration: ${6 + Math.random() * 8}s;
+    `;
+    document.body.appendChild(particle);
+  }
+}
+
+// Appeler au chargement
+createAuroraParticles();
+
+// --- Transitions d'état ---
+function setState(s) {
+  state = s;
+  const mic = $('micIcon'), wave = $('wave'), status = $('status');
+  const bar = $('progressBar'), fill = $('progressFill'), scanner = $('scanner'), card = $('card');
+  const btnR = $('btnRecord'), btnS = $('btnStop'), btnP = $('btnProve'), btnX = $('btnReset');
+
+  // Reset classes
+  mic.classList.remove('recording'); wave.classList.remove('visible');
+  bar.classList.remove('visible'); scanner.classList.remove('active');
+  card.classList.remove('proving', 'proven');
+  btnR.style.display = 'none'; btnS.style.display = 'none';
+  btnP.style.display = 'none'; btnX.style.display = 'none';
+
+  switch(s) {
+    case 'IDLE':
+      status.innerHTML = 'Appuie pour parler';
+      btnR.style.display = 'inline-flex';
+      break;
+    case 'RECORDING':
+      mic.classList.add('recording');
+      wave.classList.add('visible');
+      status.innerHTML = 'J\'écoute<span class="dots"></span>';
+      btnS.style.display = 'inline-flex';
+      break;
+    case 'UPLOADING':
+      bar.classList.add('visible');
+      animateProgress(fill, 0, 70, 1500);
+      status.innerHTML = 'Uploading<span class="dots"></span>';
+      break;
+    case 'PROCESSING':
+      bar.classList.add('visible');
+      animateProgress(fill, 70, 90, 1200);
+      scanner.classList.add('active');
+      status.innerHTML = 'Analyzing voice<span class="dots"></span>';
+      break;
+    case 'DONE':
+      status.innerHTML = '✓ Transcription terminée';
+      bar.classList.remove('visible');
+      fill.style.width = '0';
+      btnP.style.display = 'inline-flex';
+      btnX.style.display = 'inline-flex';
+      showResult();
+      break;
+    case 'PROVING':
+      card.classList.add('proving');
+      status.innerHTML = 'Generating Proof<span class="dots"></span>';
+      showTimeline(0);
+      setTimeout(() => { status.innerHTML = 'Anchoring on Solana<span class="dots"></span>'; }, 1500);
+      break;
+    case 'PROVEN':
+      card.classList.remove('proving');
+      card.classList.add('proven');
+      status.innerHTML = '⛓️ Proof anchored on-chain';
+      btnX.style.display = 'inline-flex';
+      fireFlash();
+      launchConfetti();
+      playSuccessSound();
+      $('extraActions').style.display = 'flex';
+      loadFeed();
+      break;
+  }
+}
+
+// --- Barre de progression animée ---
+function animateProgress(el, from, to, ms) {
+  el.style.transition = `width ${ms}ms ease`;
+  el.style.width = from + '%';
+  requestAnimationFrame(() => { el.style.width = to + '%'; });
+}
+
+// --- Enregistrement audio ---
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); uploadAudio(); };
+    mediaRecorder.start();
+    setState('RECORDING');
+  } catch (e) { alert('Accès micro refusé'); }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+}
+
+// --- Upload & transcription ---
+async function uploadAudio() {
+  setState('UPLOADING');
+  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+  
+  // Rendre l'audio disponible pour la relecture locale
+  const audioUrl = URL.createObjectURL(blob);
+  $('audioPlayback').src = audioUrl;
+  $('audioPlayback').style.display = 'block';
+  
+  const form = new FormData();
+  form.append('audio', blob, 'voice.webm');
+
+  setTimeout(() => { if (state === 'UPLOADING') setState('PROCESSING'); }, 1600);
+
+  try {
+    const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+    if (!res.ok) throw new Error('Erreur serveur');
+    currentData = await res.json();
+    setMoodTheme(currentData.emotion);
+    setState('DONE');
+  } catch (e) {
+    $('status').textContent = '❌ Erreur : ' + e.message;
+    $('btnRecord').style.display = 'inline-flex';
+    $('btnReset').style.display = 'inline-flex';
+  }
+}
+
+// --- Afficher le résultat ---
+function showResult() {
+  if (!currentData) return;
+  $('resultSection').classList.add('visible');
+  typeWriter($('transcript'), currentData.text);
+
+  const emojiMap = { Excited:'🔥', Determined:'💪', Passionate:'❤️', Calm:'🧘', Inspired:'💡', Confident:'😎' };
+  $('emotion').textContent = (emojiMap[currentData.emotion] || '✦') + ' ' + currentData.emotion;
+  $('confFill').style.width = '0';
+  setTimeout(() => { $('confFill').style.width = currentData.confidence + '%'; }, 200);
+
+  const eClass = currentData.energy === 'Very High' ? 'energy-vhigh' : currentData.energy === 'High' ? 'energy-high' : 'energy-medium';
+  $('energy').className = 'energy-badge ' + eClass;
+  $('energy').textContent = currentData.energy;
+
+  $('proofIdDisplay').textContent = currentData.proofId;
+}
+
+// --- Effet machine à écrire ---
+function typeWriter(el, text) {
+  el.textContent = '';
+  let i = 0;
+  const iv = setInterval(() => {
+    el.textContent += text[i];
+    i++;
+    if (i >= text.length) clearInterval(iv);
+  }, 22);
+}
+
+// --- Preuve Solana ---
+async function proveOnSolana() {
+  if (!currentData) return;
+  setState('PROVING');
+  $('solanaSection').classList.add('visible');
+
+  // Animer la timeline progressivement
+  await delay(600); showTimeline(1);
+  await delay(600); showTimeline(2);
+
+  try {
+    const res = await fetch('/api/prove', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: currentData.text, proofId: currentData.proofId })
+    });
+    if (!res.ok) throw new Error('Échec ancrage');
+    provenData = await res.json();
+
+    showTimeline(3);
+    await delay(400);
+    showTimeline(4);
+
+    $('hashText').textContent = provenData.hash.slice(0, 12) + '...' + provenData.hash.slice(-8);
+    $('explorerLink').href = provenData.explorerUrl;
+    $('verifiedText').style.display = 'block';
+    $('btnProve').style.display = 'none';
+
+    setState('PROVEN');
+    addUserToMap();
+  } catch (e) {
+    $('status').textContent = '❌ ' + e.message;
+    $('btnProve').style.display = 'inline-flex';
+    $('btnReset').style.display = 'inline-flex';
+    $('card').classList.remove('proving');
+  }
+}
+
+// --- Timeline ---
+function showTimeline(upTo) {
+  for (let i = 1; i <= 4; i++) {
+    $('tl' + i).classList.toggle('done', i <= upTo);
+  }
+}
+
+// --- Copier le hash ---
+function copyHash() {
+  if (!provenData) return;
+  navigator.clipboard.writeText(provenData.hash).then(() => {
+    $('hashText').textContent = '✓ Copié !';
+    setTimeout(() => {
+      $('hashText').textContent = provenData.hash.slice(0, 12) + '...' + provenData.hash.slice(-8);
+    }, 1500);
+  });
+}
+
+// --- Flash vert/violet ---
+function fireFlash() {
+  const f = $('flash');
+  f.classList.remove('fire');
+  void f.offsetWidth;
+  f.classList.add('fire');
+}
+
+// --- Confettis CSS ---
+function launchConfetti() {
+  const colors = ['#14F195', '#9945FF', '#FFD700', '#ff3860', '#06d6a0'];
+  for (let i = 0; i < 50; i++) {
+    const particle = document.createElement('div');
+    const tx = `${Math.random()*400-200}px`;
+    const ty = `${Math.random()*400-200}px`;
+    const rot = `${Math.random()*720}deg`;
+    particle.style.cssText = `position:fixed;width:8px;height:8px;background:${colors[Math.floor(Math.random()*colors.length)]};left:50%;top:50%;border-radius:2px;z-index:9999;pointer-events:none;animation:confettiBurst ${1+Math.random()}s ease-out forwards;animation-delay:${Math.random()*0.3}s;--tx:${tx};--ty:${ty};--rot:${rot};transform:translate(-50%,-50%)`;
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 2000);
+  }
+}
+
+// --- Sons ---
+function playSuccessSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523, 659, 784]; // C5, E5, G5
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.3);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.1);
+      osc.stop(ctx.currentTime + i * 0.1 + 0.3);
+    });
+  } catch(e) {}
+}
+
+function playPopSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 800;
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.1);
+  } catch(e) {}
+}
+
+// --- Reset ---
+function resetAll() {
+  currentData = null; provenData = null;
+  $('resultSection').classList.remove('visible');
+  $('solanaSection').classList.remove('visible');
+  $('verifiedText').style.display = 'none';
+  $('extraActions').style.display = 'none';
+  $('audioPlayback').style.display = 'none';
+  $('audioPlayback').src = '';
+  $('transcript').textContent = '';
+  $('confFill').style.width = '0';
+  showTimeline(0);
+  setState('IDLE');
+}
+
+// --- Démo (bouton caché) ---
+function useDemo() {
+  currentData = {
+    text: "I believe we can build a future where every voice matters. Technology should empower people, not replace them. Let's create something incredible together.",
+    emotion: 'Inspired', confidence: 94, energy: 'High',
+    proofId: 'VC-2026-' + Math.random().toString(16).slice(2, 8).toUpperCase()
+  };
+  setMoodTheme(currentData.emotion);
+  setState('DONE');
+}
+
+// --- Utils ---
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// --- World Mood Map Logic ---
+// Données des villes avec positions relatives sur la carte (x%, y%)
+const worldCities = [
+  { city: 'Paris', x: 49, y: 28, emotion: 'Excited', color: '#ff6b35' },
+  { city: 'Tokyo', x: 83, y: 32, emotion: 'Calm', color: '#14F195' },
+  { city: 'New York', x: 27, y: 30, emotion: 'Passionate', color: '#ff3860' },
+  { city: 'Cotonou', x: 47, y: 55, emotion: 'Inspired', color: '#9945FF' },
+  { city: 'Nairobi', x: 55, y: 60, emotion: 'Confident', color: '#06d6a0' },
+  { city: 'São Paulo', x: 34, y: 72, emotion: 'Excited', color: '#ff6b35' },
+  { city: 'Sydney', x: 85, y: 75, emotion: 'Calm', color: '#14F195' },
+  { city: 'Dubai', x: 62, y: 42, emotion: 'Passionate', color: '#ff3860' },
+  { city: 'London', x: 46, y: 22, emotion: 'Excited', color: '#ff6b35' },
+  { city: 'Lagos', x: 48, y: 58, emotion: 'Inspired', color: '#9945FF' }
+];
+
+// Ajouter les points sur la carte
+function initWorldMap() {
+  const map = document.getElementById('worldMap');
+  if (!map) return;
+  
+  worldCities.forEach(city => {
+    const dot = document.createElement('div');
+    dot.className = 'world-dot';
+    dot.setAttribute('data-city', city.city);
+    dot.style.cssText = `
+      left: ${city.x}%;
+      top: ${city.y}%;
+      background: ${city.color};
+      color: ${city.color};
+      animation-delay: ${Math.random() * -2}s;
+    `;
+    dot.title = `${city.city}: ${city.emotion}`;
+    dot.onclick = () => {
+      const toast = $('toast');
+      toast.textContent = `${city.city} is ${city.emotion}`;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    };
+    map.appendChild(dot);
+  });
+  
+  // Simuler des nouvelles vibes périodiquement
+  setInterval(() => {
+    animateMapPulse();
+  }, 10000);
+}
+
+// Animation de pulse sur la carte
+function animateMapPulse() {
+  const dots = document.querySelectorAll('.world-dot');
+  if (!dots.length) return;
+  const randomDot = dots[Math.floor(Math.random() * dots.length)];
+  randomDot.style.transform = 'scale(2.5)';
+  randomDot.style.transition = 'transform 0.3s';
+  setTimeout(() => {
+    randomDot.style.transform = 'scale(1)';
+  }, 800);
+}
+
+// Ajouter la vibe de l'utilisateur
+function addUserToMap() {
+  // Ajouter l'utilisateur à Cotonou par défaut (ou ville aléatoire)
+  const map = document.getElementById('worldMap');
+  if (!map) return;
+  
+  const userDot = document.createElement('div');
+  userDot.className = 'world-dot';
+  userDot.setAttribute('data-city', 'Vous');
+  userDot.style.cssText = `
+    left: 48%;
+    top: 53%;
+    background: #FFD700;
+    color: #FFD700;
+    animation: pulseDot 1s ease-in-out infinite;
+    width: 14px;
+    height: 14px;
+    box-shadow: 0 0 20px 8px rgba(255,215,0,0.5);
+  `;
+  userDot.title = 'Votre dernière vibe';
+  map.appendChild(userDot);
+  
+  setTimeout(() => {
+    userDot.style.width = '10px';
+    userDot.style.height = '10px';
+    userDot.style.boxShadow = '0 0 4px 2px #FFD700';
+  }, 5000);
+}
+
+// Initialiser au chargement
+initWorldMap();
+
+// --- Share Logic ---
+function shareProof() {
+  if (!provenData) return;
+  const url = window.location.origin + '/proof/' + provenData.proofId;
+  navigator.clipboard.writeText(url).then(() => {
+    const toast = $('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+}
+
+// --- Vibe Wall Logic ---
+let previousFeedCount = 0;
+
+async function loadFeed() {
+  try {
+    const res = await fetch('/api/feed');
+    const data = await res.json();
+    
+    if (previousFeedCount > 0 && data.length > previousFeedCount) {
+      playPopSound();
+    }
+    previousFeedCount = data.length;
+    document.getElementById('vibeCount').textContent = data.length + 3; // +3 pour les démos
+    
+    const emojiMap = { Excited:'🔥', Determined:'💪', Passionate:'❤️', Calm:'🧘', Inspired:'💡', Confident:'😎' };
+    const html = data.map((item, i) => `
+      <div class="feed-item" style="animation-delay: ${i * 0.1}s" onclick="window.open('/proof/${item.proofId}', '_blank')">
+        <div class="feed-main">
+          <div class="feed-text">${emojiMap[item.emotion] || '✦'} "${item.text}"</div>
+          <div class="feed-meta">
+            <span>${timeAgo(item.timestamp)}</span>
+            <span class="feed-solana">✓ Devnet</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    $('feedList').innerHTML = html;
+  } catch (e) { console.error('Erreur feed', e); }
+}
+
+async function downloadBadge() {
+  if (!provenData) return;
+  const res = await fetch(`/api/badge/${provenData.proofId}`);
+  const svg = await res.text();
+  const blob = new Blob([svg], {type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `VibeCheck_${provenData.proofId}.svg`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  const toast = $('toast');
+  toast.textContent = 'Badge téléchargé ! 🎖️';
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.textContent = 'Lien copié dans le presse-papier !', 300);
+  }, 2000);
+}
+
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return "à l'instant";
+  const min = Math.floor(diff / 60);
+  if (min < 60) return `il y a ${min} min`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `il y a ${hr}h`;
+  return `il y a ${Math.floor(hr/24)} jours`;
+}
+
+// Polling discret
+setInterval(loadFeed, 30000);
+loadFeed();
+
+// Init
+setState('IDLE');
+
+// Enregistrement du Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
