@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a1a" />
+      <stop offset="50%" stop-color="#120025" />
+      <stop offset="100%" stop-color="#0d0030" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#14F195" />
+      <stop offset="100%" stop-color="#9945FF" />
+    </linearGradient>
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(20,241,149,0.2)" />
+      <stop offset="100%" stop-color="rgba(153,69,255,0.2)" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fond -->
+  <rect width="1280" height="640" fill="url(#bg)" />
+
+  <!-- Cercles décoratifs -->
+  <circle cx="200" cy="200" r="180" fill="rgba(153,69,255,0.06)" filter="url(#softGlow)" />
+  <circle cx="1080" cy="440" r="220" fill="rgba(20,241,149,0.04)" filter="url(#softGlow)" />
+  <circle cx="640" cy="500" r="300" fill="rgba(255,56,96,0.03)" filter="url(#softGlow)" />
+
+  <!-- Icône centrale : micro + onde + blockchain -->
+  <g transform="translate(640, 280)" filter="url(#glow)">
+    <!-- Cercle externe -->
+    <circle cx="0" cy="0" r="80" fill="none" stroke="url(#textGrad)" stroke-width="2" opacity="0.4">
+      <animate attributeName="r" values="80;85;80" dur="3s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.4;0.6;0.4" dur="3s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="0" cy="0" r="60" fill="url(#badgeGrad)" stroke="url(#textGrad)" stroke-width="1.5" />
+
+    <!-- Onde sonore -->
+    <rect x="-8" y="-20" width="16" height="40" rx="4" fill="url(#textGrad)" />
+    <path d="M-25,-30 Q-30,0 -25,30" fill="none" stroke="#14F195" stroke-width="3" stroke-linecap="round" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1.5s" repeatCount="indefinite" />
+    </path>
+    <path d="M-35,-40 Q-42,0 -35,40" fill="none" stroke="#14F195" stroke-width="2" stroke-linecap="round" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.1;0.5" dur="2s" repeatCount="indefinite" />
+    </path>
+
+    <!-- Maillon blockchain -->
+    <path d="M15,-15 L30,-15 L30,15 L15,15 Z" fill="none" stroke="#9945FF" stroke-width="2" rx="3" />
+    <path d="M25,-15 L25,-5 L35,-5 L35,5 L25,5 L25,15" fill="none" stroke="#9945FF" stroke-width="2" opacity="0.7" />
+    <circle cx="30" cy="0" r="3" fill="#14F195" />
+  </g>
+
+  <!-- Titre principal -->
+  <text x="640" y="430" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-size="72" font-weight="800" fill="url(#textGrad)" text-anchor="middle" filter="url(#glow)">
+    VibeCheck
+  </text>
+
+  <!-- Slogan -->
+  <text x="640" y="480" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-size="28" font-weight="400" fill="#a0a0c0" text-anchor="middle" letter-spacing="4">
+    YOUR VOICE. VERIFIED FOREVER.
+  </text>
+
+  <!-- Badge Protocole -->
+  <rect x="480" y="510" width="320" height="36" rx="18" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" />
+  <text x="640" y="534" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#8888aa" text-anchor="middle" letter-spacing="2">
+    IMMUTABLE VOICE PROTOCOL
+  </text>
+
+  <!-- Badges technologies -->
+  <g transform="translate(640, 580)">
+    <rect x="-260" y="-16" width="100" height="28" rx="6" fill="rgba(20,241,149,0.1)" stroke="rgba(20,241,149,0.3)" />
+    <text x="-210" y="4" font-family="monospace" font-size="11" fill="#14F195" text-anchor="middle">⚡ Solana</text>
+
+    <rect x="-140" y="-16" width="110" height="28" rx="6" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" />
+    <text x="-85" y="4" font-family="monospace" font-size="11" fill="#e8e8f0" text-anchor="middle">▲ Vercel</text>
+
+    <rect x="-10" y="-16" width="120" height="28" rx="6" fill="rgba(153,69,255,0.1)" stroke="rgba(153,69,255,0.3)" />
+    <text x="50" y="4" font-family="monospace" font-size="11" fill="#9945FF" text-anchor="middle">🎙️ ElevenLabs</text>
+
+    <rect x="130" y="-16" width="90" height="28" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" />
+    <text x="175" y="4" font-family="monospace" font-size="11" fill="#8888aa" text-anchor="middle">SHA-256</text>
+  </g>
+
+  <!-- Particules flottantes -->
+  <circle cx="150" cy="500" r="2" fill="#14F195" opacity="0.6">
+    <animate attributeName="cy" values="500;480;500" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.6;0.1;0.6" dur="4s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="1100" cy="150" r="2" fill="#9945FF" opacity="0.5">
+    <animate attributeName="cy" values="150;130;150" dur="5s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.5;0.1;0.5" dur="5s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="900" cy="550" r="1.5" fill="#ff3860" opacity="0.4">
+    <animate attributeName="cy" values="550;535;550" dur="3.5s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="300" cy="100" r="2" fill="#14F195" opacity="0.5">
+    <animate attributeName="cy" values="100;85;100" dur="6s" repeatCount="indefinite" />
+  </circle>
+</svg>

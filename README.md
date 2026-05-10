@@ -1,3 +1,5 @@
+![VibeCheck Banner](public/banner.svg)
+
 # 🎤 VibeCheck — Your Voice. Verified Forever.
 
 > **A protocol for immutable voice authenticity.** Built for **Dev3Pack Hackathon 2026**.
